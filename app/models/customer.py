@@ -29,6 +29,7 @@ class Purchase(db.Model):
     
     def to_dict(self):
         return {
+            'id': f'#{self.id:03d}',
             'product': self.product,
             'amount': float(self.amount),
             'date': self.date.isoformat() if self.date else None

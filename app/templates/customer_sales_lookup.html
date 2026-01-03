@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Sales Dashboard</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        /* Header styles */
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        /* Form section */
+        .form-section {
+            padding: 30px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .search-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .input-group {
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        /* Results section */
+        .results-section {
+            padding: 20px;
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 1.4rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #34495e;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        tbody tr:hover {
+            background-color: #eef5ff;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .form-section {
+                padding: 20px;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .form-section {
+                padding: 15px;
+            }
+            
+            input[type="text"], button {
+                width: 100%;
+            }
+            
+            th, td {
+                padding: 6px 4px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Customer Sales Lookup System</h1>
+            <div class="subtitle">Search for customer purchase details</div>
+        </header>
+        
+        <section class="form-section">
+            <form class="search-form" method="GET" action="/customer-sales-lookup">
+                <div class="input-group">
+                    <label for="customer_name">Customer Name</label>
+                    <input type="text" id="customer_name" name="name" placeholder="Enter customer name" required>
+                </div>
+                <button type="submit">Search</button>
+            </form>
+        </section>
+        
+        <section class="results-section">
+            <h2>Purchase Details</h2>
+            {% if customer_data %}
+                {% if customer_data.purchases %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Purchase ID</th>
+                                <th>Product</th>
+                                <th>Purchase Date</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for purchase in customer_data.purchases %}
+                            <tr>
+                                <td>{{ purchase.id or 'N/A' }}</td>
+                                <td>{{ purchase.product or 'N/A' }}</td>
+                                <td>{{ purchase.date or 'N/A' }}</td>
+                                <td>${{ "%.2f"|format(purchase.amount|float) if purchase.amount else '0.00' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No purchase history found for {{ customer_name }}.</p>
+                {% endif %}
+            {% else %}
+                {% if customer_name %}
+                    <p>Customer {{ customer_name }} not found.</p>
+                {% else %}
+                    {% set placeholder_purchases = [
+                        {'id': '#P001', 'product': 'Wireless Headphones', 'date': '2023-05-15', 'amount': 129.99},
+                        {'id': '#P002', 'product': 'Bluetooth Speaker', 'date': '2023-06-22', 'amount': 89.50},
+                        {'id': '#P003', 'product': 'Smart Watch', 'date': '2023-07-10', 'amount': 249.99},
+                        {'id': '#P004', 'product': 'Laptop Stand', 'date': '2023-08-05', 'amount': 45.00},
+                        {'id': '#P005', 'product': 'USB-C Cable', 'date': '2023-09-18', 'amount': 19.99}
+                    ] %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Purchase ID</th>
+                                <th>Product</th>
+                                <th>Purchase Date</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for purchase in placeholder_purchases %}
+                            <tr>
+                                <td>{{ purchase.id }}</td>
+                                <td>{{ purchase.product }}</td>
+                                <td>{{ purchase.date }}</td>
+                                <td>${{ "%.2f"|format(purchase.amount|float) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            {% endif %}
+        </section>
+    </div>
+</body>
+</html>
