@@ -1,156 +1,113 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-Script to populate MySQL database with 10 sample data entries
+Script to populate the database with sample data.
+Creates 10 customers and 25 purchases as specified in the README.
 """
+
 import os
 import sys
-from datetime import datetime, date
+import random
+from datetime import datetime, timedelta
+from decimal import Decimal
+
+# Add the project root to the Python path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from app import create_app, db
 from app.models.customer import Customer, Purchase
 
-# Load environment variables from .env file
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    print("python-dotenv not installed, skipping .env file loading")
 
-def populate_sample_data():
-    # Use the database URL from environment variables
-    database_url = os.environ.get('DATABASE_URL', 'sqlite:///customer_sales.db')
-    
-    # Create app with the database URL
-    os.environ['DATABASE_URL'] = database_url
+def populate_database():
+    """Populate the database with sample customers and purchases."""
+
+    # Create Flask app instance with proper configuration
     app = create_app()
-    
-    with app.app_context():
-        try:
-            # Test database connection
-            db.engine.connect()
-            print("Database connection successful!")
-        except Exception as e:
-            print(f"Database connection failed: {e}")
-            print("\nMake sure your database is running.")
-            sys.exit(1)
-        
-        # Drop and recreate tables
-        db.drop_all()
-        db.create_all()
-        
-        # Create 10 sample customers with purchases
-        sample_customers = [
-            {
-                "name": "John Doe",
-                "email": "john.doe@example.com",
-                "purchases": [
-                    {"product": "Laptop", "amount": 1200.00, "date": date(2024, 1, 15)},
-                    {"product": "Mouse", "amount": 25.99, "date": date(2024, 1, 20)},
-                    {"product": "Keyboard", "amount": 75.50, "date": date(2024, 2, 10)}
-                ]
-            },
-            {
-                "name": "Jane Smith",
-                "email": "jane.smith@example.com",
-                "purchases": [
-                    {"product": "Monitor", "amount": 300.00, "date": date(2024, 3, 5)},
-                    {"product": "Webcam", "amount": 89.99, "date": date(2024, 3, 12)}
-                ]
-            },
-            {
-                "name": "Bob Johnson",
-                "email": "bob.johnson@example.com",
-                "purchases": [
-                    {"product": "Desk Chair", "amount": 150.00, "date": date(2024, 4, 1)}
-                ]
-            },
-            {
-                "name": "Alice Williams",
-                "email": "alice.williams@example.com",
-                "purchases": [
-                    {"product": "Smartphone", "amount": 899.99, "date": date(2024, 2, 28)},
-                    {"product": "Phone Case", "amount": 29.99, "date": date(2024, 3, 1)}
-                ]
-            },
-            {
-                "name": "Charlie Brown",
-                "email": "charlie.brown@example.com",
-                "purchases": [
-                    {"product": "Headphones", "amount": 199.99, "date": date(2024, 1, 10)},
-                    {"product": "Charging Cable", "amount": 19.99, "date": date(2024, 1, 12)},
-                    {"product": "Power Bank", "amount": 59.99, "date": date(2024, 2, 5)}
-                ]
-            },
-            {
-                "name": "Diana Miller",
-                "email": "diana.miller@example.com",
-                "purchases": [
-                    {"product": "Tablet", "amount": 450.00, "date": date(2024, 4, 15)},
-                    {"product": "Tablet Stand", "amount": 35.00, "date": date(2024, 4, 16)},
-                    {"product": "Screen Protector", "amount": 15.99, "date": date(2024, 4, 17)}
-                ]
-            },
-            {
-                "name": "Ethan Davis",
-                "email": "ethan.davis@example.com",
-                "purchases": [
-                    {"product": "Gaming Console", "amount": 499.99, "date": date(2024, 5, 10)},
-                    {"product": "Gaming Controller", "amount": 69.99, "date": date(2024, 5, 12)}
-                ]
-            },
-            {
-                "name": "Fiona Garcia",
-                "email": "fiona.garcia@example.com",
-                "purchases": [
-                    {"product": "Smart Watch", "amount": 299.99, "date": date(2024, 6, 5)},
-                    {"product": "Watch Band", "amount": 25.00, "date": date(2024, 6, 6)},
-                    {"product": "Wireless Charger", "amount": 39.99, "date": date(2024, 6, 8)}
-                ]
-            },
-            {
-                "name": "George Rodriguez",
-                "email": "george.rodriguez@example.com",
-                "purchases": [
-                    {"product": "Bluetooth Speaker", "amount": 129.99, "date": date(2024, 7, 1)},
-                    {"product": "Audio Cable", "amount": 19.99, "date": date(2024, 7, 3)}
-                ]
-            },
-            {
-                "name": "Helen Martinez",
-                "email": "helen.martinez@example.com",
-                "purchases": [
-                    {"product": "Camera", "amount": 799.99, "date": date(2024, 8, 15)},
-                    {"product": "Memory Card", "amount": 49.99, "date": date(2024, 8, 16)},
-                    {"product": "Tripod", "amount": 89.99, "date": date(2024, 8, 18)},
-                    {"product": "Camera Bag", "amount": 69.99, "date": date(2024, 8, 20)}
-                ]
-            }
-        ]
-        
-        # Add customers and their purchases to the database
-        for customer_data in sample_customers:
-            customer = Customer(
-                name=customer_data["name"],
-                email=customer_data["email"]
-            )
-            db.session.add(customer)
-            db.session.flush()  # Get the ID for the customer
-            
-            for purchase_data in customer_data["purchases"]:
-                purchase = Purchase(
-                    product=purchase_data["product"],
-                    amount=purchase_data["amount"],
-                    date=purchase_data["date"],
-                    customer_id=customer.id
-                )
-                db.session.add(purchase)
-        
-        # Commit all changes
-        db.session.commit()
-        
-        print("Database populated with 10 sample customers and their purchases!")
-        print(f"Total customers: {len(sample_customers)}")
-        total_purchases = sum(len(c["purchases"]) for c in sample_customers)
-        print(f"Total purchases: {total_purchases}")
 
-if __name__ == '__main__':
-    populate_sample_data()
+    with app.app_context():
+        # Create all tables (if they don't exist)
+        db.create_all()
+
+        # Clear existing data to ensure we start fresh
+        Purchase.query.delete()
+        Customer.query.delete()
+        db.session.commit()
+
+        print("Cleared existing data. Populating with new sample data...")
+
+        # Sample customer names and emails
+        customer_data = [
+            ("John Smith", "john.smith@example.com"),
+            ("Emma Johnson", "emma.johnson@example.com"),
+            ("Michael Williams", "michael.williams@example.com"),
+            ("Sarah Brown", "sarah.brown@example.com"),
+            ("David Jones", "david.jones@example.com"),
+            ("Lisa Davis", "lisa.davis@example.com"),
+            ("James Miller", "james.miller@example.com"),
+            ("Jennifer Wilson", "jennifer.wilson@example.com"),
+            ("Robert Taylor", "robert.taylor@example.com"),
+            ("Patricia Anderson", "patricia.anderson@example.com")
+        ]
+
+        # Sample products
+        products = [
+            "Laptop", "Wireless Mouse", "Mechanical Keyboard", "Monitor",
+            "Webcam", "Headphones", "USB-C Hub", "External Hard Drive",
+            "Tablet", "Smartphone", "Bluetooth Speaker", "Smart Watch",
+            "Gaming Controller", "Printer", "Scanner", "Router",
+            "Smart TV", "Coffee Maker", "Blender", "Microwave",
+            "Refrigerator", "Washing Machine", "Vacuum Cleaner", "Toaster",
+            "Electric Kettle", "Air Fryer", "Pressure Cooker", "Dishwasher"
+        ]
+
+        # Create customers
+        customers = []
+        for name, email in customer_data:
+            customer = Customer(name=name, email=email)
+            db.session.add(customer)
+            customers.append(customer)
+
+        # Commit customers to get IDs for foreign key relationships
+        db.session.commit()
+
+        # Create 25 purchases distributed among the customers
+        purchases = []
+        for i in range(25):
+            # Randomly select a customer
+            customer = random.choice(customers)
+
+            # Randomly select a product
+            product = random.choice(products)
+
+            # Generate a random amount between $10.00 and $1500.00
+            amount = round(Decimal(random.uniform(10.00, 1500.00)), 2)
+
+            # Generate a random date within the last year
+            days_ago = random.randint(1, 365)
+            date = (datetime.now() - timedelta(days=days_ago)).date()
+
+            purchase = Purchase(
+                product=product,
+                amount=amount,
+                date=date,
+                customer_id=customer.id
+            )
+
+            db.session.add(purchase)
+            purchases.append(purchase)
+
+        # Commit all purchases
+        db.session.commit()
+
+        print(f"Successfully populated database with {len(customers)} customers and {len(purchases)} purchases.")
+
+        # Print summary
+        print("\nCustomer Summary:")
+        for customer in customers:
+            purchase_count = len(customer.purchases)
+            print(f"- {customer.name}: {purchase_count} purchase(s)")
+
+        print(f"\nTotal purchases: {len(purchases)}")
+
+
+if __name__ == "__main__":
+    populate_database()

@@ -61,8 +61,8 @@ This mirrors common enterprise use cases such as:
 │   │   └── customer_service.py
 │   ├── models/              # Database models
 │   │   └── customer.py
-│   └── config/              # Configuration
-│       └── settings.py
+│   └── templates/           # HTML templates
+│       └── customer_sales_lookup.html
 ├── scripts/                 # Initialization scripts
 │   └── populate_db.py       # Script to populate sample data
 ├── run.py                   # Application entry point
@@ -113,11 +113,22 @@ Response:
   "message": "Welcome to the Two-Tier Customer Sales Application",
   "endpoints": {
     "health": "/health",
-    "customers": "/customers?name=<customer_name>"
+    "customers": "/customers?name=<customer_name>",
+    "customer_sales_lookup": "/customer-sales-lookup"
   },
   "description": "This is a production-style two-tier web application designed to allow a client to view customer sales and purchase details by customer name."
 }
 ```
+
+### Customer Sales Lookup UI
+
+The main user interface for the application is available at:
+
+```
+GET /customer-sales-lookup
+```
+
+This provides a user-friendly form where users can enter a customer name and view their purchase history in a table format showing Purchase ID, Product, Purchase Date, and Amount.
 
 ### Health Check Endpoint
 
@@ -172,7 +183,19 @@ Response:
     }
   ]
 }
+
+### Customer Sales Lookup UI
+
 ```
+GET /customer-sales-lookup
+```
+
+This endpoint serves the main user interface where users can:
+
+* Enter a customer name in the search form
+* View purchase details in a table format
+* See columns: Purchase ID, Product, Purchase Date, Amount
+* Access sample data when no customer is specified
 
 ---
 
@@ -227,6 +250,11 @@ Application runs at:
 http://localhost:5000
 ```
 
+The application uses the following ports:
+
+* **Port 5000**: Main Flask application (UI and API)
+* **Port 3306**: MySQL database (internal, not exposed publicly)
+
 ---
 
 ## Docker Workflow
@@ -261,8 +289,10 @@ docker-compose down
 
 ```bash
 # After containers are running, populate with sample data
-docker exec -e PYTHONPATH=/app -w /app automated-2tier-flask-app-1 python3 scripts/populate_db.py
+docker-compose exec app python /app/scripts/populate_db.py
 ```
+
+This script will create 10 sample customers and 25 purchase records as specified in the requirements.
 
 ---
 
@@ -277,20 +307,14 @@ The application uses two main tables:
 
 ## Sample Data
 
-The application is populated with **10 sample customers** and their purchase records:
+The application is populated with **10 sample customers** and **25 purchase records** using the populate_db.py script:
 
-1. **John Doe** - 3 purchases
-2. **Jane Smith** - 2 purchases
-3. **Bob Johnson** - 1 purchase
-4. **Alice Williams** - 2 purchases
-5. **Charlie Brown** - 3 purchases
-6. **Diana Miller** - 3 purchases
-7. **Ethan Davis** - 2 purchases
-8. **Fiona Garcia** - 3 purchases
-9. **George Rodriguez** - 2 purchases
-10. **Helen Martinez** - 4 purchases
+* **Customers**: 10 sample customers with names and emails
+* **Purchases**: 25 purchase records distributed among customers
+* **Products**: Various electronic items, home appliances, and accessories
+* **Data**: Realistic amounts and dates within the past year
 
-Total: **25 purchase records** across 10 customers
+The script creates diverse customer profiles with varying numbers of purchases to demonstrate the application's functionality.
 
 ---
 
